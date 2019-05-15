@@ -1,19 +1,16 @@
-package net;
-
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 public class Client {
     Socket mySocket = null;
     int porta=6789;
     boolean connected;
-    DataInputStream in;
+    BufferedReader in;
     DataOutputStream out;
-    Scanner keyboard;
+    BufferedReader keyboard;
     static int i=0;
     public boolean communicate(){
         try{
@@ -23,23 +20,29 @@ public class Client {
                 while(!(received=in.readLine()).equals("End")){
                     System.out.printf(received + '\n');
                 }
-                keyboard = new Scanner(System.in);
-                String message = keyboard.nextLine();
+                String message = keyboard.readLine();
                 out.writeBytes(message + "\n");
-                if (message.toUpperCase().equals("NO")) {
-                    connected = false;
+                if (message.toUpperCase().equals("NO")){
+                    connected=false;
                 }
                 return  connected;
+            }
+            else if(received.equals("Lettera non valida")){
+                System.out.println("Riprova(Lettera non valida)");
+                keyboard = new BufferedReader(new InputStreamReader(System.in));
+                String message = keyboard.readLine();
+                out.writeBytes(message + "\n");
+                return true;
             }
             else {
                 while (!(received = in.readLine()).equals("End")) {
                     System.out.printf(received + '\n');
                 }
                 System.out.println("Inserisci:");
-                keyboard = new Scanner(System.in);
-                String message = keyboard.nextLine();
+                keyboard = new BufferedReader(new InputStreamReader(System.in));
+                String message = keyboard.readLine();
                 out.writeBytes(message + "\n");
-                return connected;
+                return true;
             }
         }
         catch(IOException e){
@@ -56,7 +59,7 @@ public class Client {
             System.out.println("[1]-Bonjour, Finesse");
             connected=true;
             out=new DataOutputStream(mySocket.getOutputStream());
-            in=new DataInputStream(mySocket.getInputStream());
+            in=new BufferedReader(new InputStreamReader(mySocket.getInputStream()));
         }
         catch(UnknownHostException e){
             System.err.println("Host sconosciuto");
@@ -70,6 +73,6 @@ public class Client {
     public static void main(String argv[]){
         Client c=new Client();
         c.connect();
-       while(c.communicate()){}
+        while(c.communicate()){}
     }
 }

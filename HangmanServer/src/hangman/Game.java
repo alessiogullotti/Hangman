@@ -58,10 +58,12 @@ public class Game {
      * @param c the letter guessed by the player
      */
     public void makeAttempt(char c) {
-        c = Character.toUpperCase(c);
-        if (!attempts.contains(c))
-            attempts.add(c);
-        this.notifyObservers();
+
+            c = Character.toUpperCase(c);
+            if (!attempts.contains(c))
+                attempts.add(c);
+            this.notifyObservers();
+
     }
     
     /**

@@ -5,8 +5,6 @@
  * Dept of Electrical, Computer and Biomedical Engineering,
  * University of Pavia.
  */
-package net;
-
 import hangman.Game;
 import hangman.Hangman;
 import hangman.Player;
@@ -14,6 +12,7 @@ import hangman.Player;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
 
 /**
  * Manage a player playing with the terminal.
@@ -22,28 +21,23 @@ import java.net.Socket;
  */
 public class ConnectedClient extends Player implements Runnable{
 
-    String riga;
     BufferedReader console;
-    BufferedReader console1;
     Socket clientsocket;
-    int porta = 6789;
     boolean play;
 
     BufferedReader in;
     DataOutputStream out = null;
-    BufferedReader tastiera = null;
     String stampa;
 
 
     /**
      * Constructor.
      */
-    public ConnectedClient( Socket socket) throws IOException {
+    public ConnectedClient(Socket socket) throws IOException {
         stampa="";
         console = new BufferedReader(new InputStreamReader(System.in));
-        clientsocket = socket;
-        //System.out.println("3.Connessione stabilita");
         play=true;
+        clientsocket=socket;
         in = new BufferedReader(new InputStreamReader(clientsocket.getInputStream()));
         out = new DataOutputStream(clientsocket.getOutputStream());
 
@@ -52,9 +46,10 @@ public class ConnectedClient extends Player implements Runnable{
     }
 
     public String invia() throws  IOException {
-        //System.out.println("4. aspetto un messaggio");
+        System.out.println("4. aspetto un messaggio");
         String  console = in.readLine();//////////////////////////////////////
-        //System.out.println("5. messsaggio ricevuto " + console);
+
+        System.out.println("5. messsaggio ricevuto " + console);
         String risposta = console.toUpperCase();
 
         return risposta;
@@ -70,8 +65,8 @@ public class ConnectedClient extends Player implements Runnable{
                 printBanner("Hai perso!  La parola da indovinare era '" +
                         game.getSecretWord() + "'");
                 try {
+                    System.out.println("update fine");
                     out.writeBytes(stampa);
-                    System.out.println("fine");
                     String response=in.readLine();
                     System.out.println(response);
                     if(response.toUpperCase().equals("NO")){
@@ -86,8 +81,11 @@ public class ConnectedClient extends Player implements Runnable{
                 stampa+="CLOSED\n";
                 printBanner("Hai indovinato!   (" + game.getSecretWord() + ")");
                 try{
+                    System.out.println("update vinto");
                     out.writeBytes(stampa);
                     String response=in.readLine();
+                    System.out.println("gioca di nuovo");
+
                     if(response.toUpperCase().equals("NO")){
                         play=false;
                     }
@@ -97,14 +95,15 @@ public class ConnectedClient extends Player implements Runnable{
                 int rem = Game.MAX_FAILED_ATTEMPTS - game.countFailedAttempts();
                 stampa="";
                 stampa+="OPEN";
-                //System.out.print("\n" + rem + " tentativi rimasti\n");
-                //System.out.println(this.gameRepresentation(game));
-                //System.out.println(game.getKnownLetters());
+                System.out.print("\n" + rem + " tentativi rimasti\n");
+                System.out.println(this.gameRepresentation(game));
+                System.out.println(game.getKnownLetters());
                 stampa+="\n" + rem + " tentativi rimasti\n"+this.gameRepresentation(game)+'\n'+game.getKnownLetters()+'\n'+"End\n";
-               try {
-                   out.writeBytes(stampa);
-               }
-               catch (Exception e){}
+                try {
+                    System.out.println("qua");
+                    out.writeBytes(stampa);
+                }
+                catch (Exception e){}
                 break;
         }
     }
@@ -124,15 +123,14 @@ public class ConnectedClient extends Player implements Runnable{
     }
 
     private void printBanner(String message) {
-        //System.out.println("");
-        //for (int i = 0; i < 80; i++)
-          //  System.out.print("*");
-        //System.out.println("\n***  " + message);
-        //for (int i = 0; i < 80; i++)
-
-          //  System.out.print("*");
-        //System.out.println("\n");
-        stampa+="************************\n*** "+message+"\n**********************\nVuoi giocare ancora?\n";
+        System.out.println("");
+        for (int i = 0; i < 80; i++)
+            System.out.print("*");
+        System.out.println("\n***  " + message);
+        for (int i = 0; i < 80; i++)
+            System.out.print("*");
+        System.out.println("\n");
+        stampa+="************************\n*** "+message+"\n**********************\nVuoi giocare ancora?\n"+"End\n";
     }
 
     /**
@@ -147,19 +145,18 @@ public class ConnectedClient extends Player implements Runnable{
 
             String line = null;
             try {
+
                 line = invia();
-                System.out.println(line+" this");
             } catch (IOException e) {
                 line = "";
             }
             if (line.length() == 1 && Character.isLetter(line.charAt(0))) {
+                System.out.println("giusto");
                 return line.charAt(0);
-            }
-            else {
-                //System.out.println("Lettera non valida.\n");
-                stampa+="Lettera non valida.\n";
+            } else {
+                System.out.println("Lettera non valida.\n");
                 try {
-                    out.writeBytes(stampa);
+                    out.writeBytes("Lettera non valida\n");
                 }
                 catch (IOException e){}
 
@@ -170,7 +167,6 @@ public class ConnectedClient extends Player implements Runnable{
     public boolean isPlay() {
         return play;
     }
-
     public void run() {
         Hangman game = new Hangman();
         // Player player = new ArtificialPlayer();
